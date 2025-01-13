@@ -136,6 +136,46 @@ class VisualizarFrequenciaController extends Controller
         ];
     }
 
+    public function criarOcorrencia($dia, $mes, $ano)
+    {
+        return view('pontos.ocorrencia')
+            ->with('dia', $dia)
+            ->with('mes', $mes)
+            ->with('ano', $ano);
+    }
+
+    public function salvarOcorrencia(Request $request)
+    {
+        $ponto = new Ponto();
+        $dia = $request->dia;
+        $mes = $request->mes;
+        $ano = $request->ano;
+
+        if ($request->periodo == 1) {
+            $ponto->created_at = Carbon::create($ano, $mes, $dia, 6, 0, 0); // 06:00 AM
+            $ponto->saida = $ponto->created_at->addSecond();
+        }
+
+        if ($request->periodo == 2) {
+            $ponto->created_at = Carbon::create($ano, $mes, $dia, 12, 0, 0); // 12:00 PM
+            $ponto->saida = $ponto->created_at->addSecond();
+        }
+
+        if ($request->periodo == 3) {
+            $ponto->created_at = Carbon::create($ano, $mes, $dia, 18, 30, 0); // 18:30 PM
+            $ponto->saida = $ponto->created_at->addSecond();
+        }
+
+        $ponto->user_id = $request->usuario;
+        $ponto->periodo = $request->periodo;
+        $ponto->ocorrencia = $request->sigla;
+        $ponto->latitude = 0;
+        $ponto->longitude = 0;
+        $ponto->save();
+
+        return redirect()->route('visualizar-frequencia.index', $request->usuario);
+    }
+    
     public function relatorio(Request $request, User $usuario)
     {
         $ano = $request->ano ?: Carbon::now('America/Sao_Paulo')->year;
